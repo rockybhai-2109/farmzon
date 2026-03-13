@@ -15,6 +15,8 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageSelectionScreen } from "@/components/LanguageSelectionScreen";
+import PageTransition from "@/components/PageTransition";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function RootLayout({
   children,
@@ -39,7 +41,10 @@ export default function RootLayout({
                 <LocationProvider>
                   <CartProvider>
                     <AuthProvider>
-                      {children}
+                      <PageTransition>
+                        {children}
+                      </PageTransition>
+                      <Toaster />
                     </AuthProvider>
                   </CartProvider>
                 </LocationProvider>

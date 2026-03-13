@@ -12,6 +12,8 @@ import CartDrawer from '@/components/CartDrawer';
 import { PricePredictor } from '@/components/PricePredictor';
 import { ImpactBadges } from '@/components/farmer/ImpactBadges';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton, ListingSkeleton } from '@/components/ui/Skeleton';
+import { TrustBadge } from '@/components/ui/TrustBadges';
 
 // Farmer phone numbers (demo)
 const FARMER_PHONES: Record<number, string> = {
@@ -127,9 +129,9 @@ function VeggieCard({ item, onOpenCart }: { item: any; onOpenCart: () => void })
                 <div className="p-8">
                     {/* Impact Badges */}
                     <div className="flex flex-wrap gap-2 mb-6">
-                        {item.organic && <ImpactBadges type="organic" />}
-                        {item.freshness >= 95 && <ImpactBadges type="fresh" />}
-                        <ImpactBadges type="certified" />
+                        {item.organic && <TrustBadge type="organic" size="sm" />}
+                        {item.freshness >= 95 && <TrustBadge type="verified" size="sm" />}
+                        <TrustBadge type="premium" size="sm" showLabel={false} />
                     </div>
 
                     {/* Price + prediction toggle area (simplified for card) */}
@@ -407,9 +409,15 @@ export default function MarketPage() {
 
                 {/* Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
-                    {filteredAndSorted.map(item => (
-                        <VeggieCard key={item.id} item={item} onOpenCart={() => setCartOpen(true)} />
-                    ))}
+                    {listings.length === 0 ? (
+                        <>
+                            {[1, 2, 3, 4, 5, 6].map(i => <ListingSkeleton key={i} />)}
+                        </>
+                    ) : (
+                        filteredAndSorted.map(item => (
+                            <VeggieCard key={item.id} item={item} onOpenCart={() => setCartOpen(true)} />
+                        ))
+                    )}
                     {filteredAndSorted.length === 0 && (
                         <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 20px', background: 'white', borderRadius: '24px', border: '1px solid #E5E7EB' }}>
                             <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔍</div>

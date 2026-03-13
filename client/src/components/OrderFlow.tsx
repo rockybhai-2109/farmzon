@@ -1,5 +1,12 @@
+import React, { useState, useEffect } from 'react';
 import { Zap, Timer, CheckCircle2, ChevronRight, MapPin, Truck, Tractor, Package, Info, Check, X, Clock, Handshake, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
+import { useLocation } from '@/context/LocationContext';
+import LocationButton from './location/LocationButton';
+import AddressAutocomplete from './location/AddressAutocomplete';
+import MiniMap from './location/MiniMap';
+import LiveTrackingMap from './location/LiveTrackingMap';
 
 interface OrderFlowProps {
     item: any;
@@ -97,7 +104,7 @@ export default function OrderFlow({ item, qty: initialQty, onClose }: OrderFlowP
                             </div>
                         ) : (
                             <div style={{ textAlign: 'left', marginBottom: '20px', background: '#F1F5F9', padding: '16px', borderRadius: '16px' }}>
-                                <h4 style={{ fontSize: '14px', fontWeight: 900, marginBottom: '12px', color: '#334155', textTransform: 'uppercase', tracking: '1px' }}>{t('next_timeline_title')}</h4>
+                                <h4 style={{ fontSize: '14px', fontWeight: 900, marginBottom: '12px', color: '#334155', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('next_timeline_title')}</h4>
                                 {[
                                     { icon: <Check size={14} />, label: t('timeline_sent'), color: '#22C55E' },
                                     { icon: <Handshake size={14} />, label: t('timeline_confirm'), color: '#64748B' },

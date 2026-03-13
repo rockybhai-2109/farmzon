@@ -10,6 +10,9 @@ import { Star, MapPin, ShieldCheck, Clock, Award, Leaf, ArrowRight, Share2, Hear
 import { useCart } from '@/context/CartContext';
 import { VEGETABLE_NAMES } from '@/data/gujaratData';
 import OrderFlow from '@/components/OrderFlow';
+import { TrustBadge } from '@/components/ui/TrustBadges';
+import { CertificationBoard } from '@/components/farmer/CertificationBoard';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 const farmersData: Record<string, {
     id: number; image: string; name: string; farm: string; location: string;
@@ -300,9 +303,11 @@ export default function FarmerProfilePage({ params }: { params: Promise<{ id: st
                             >
                                 <div className="flex flex-wrap items-center gap-4 mb-4 justify-center md:justify-start">
                                     <h1 className="text-5xl font-black text-white font-display tracking-tight">{farmer.name}</h1>
-                                    <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${farmer.badgeClass} shadow-lg border border-white/10`}>
-                                        {farmer.badge}
-                                    </span>
+                                    <div className="flex gap-2">
+                                        <TrustBadge type="verified" size="sm" />
+                                        <TrustBadge type="organic" size="sm" />
+                                        {farmer.rating >= 4.8 && <TrustBadge type="top_rated" size="sm" />}
+                                    </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-6 text-white/70 text-sm font-bold justify-center md:justify-start mb-8">
                                     <div className="flex items-center gap-2 text-white"><MapPin className="w-4 h-4 text-accent" /> {farmer.location}</div>
@@ -598,13 +603,8 @@ export default function FarmerProfilePage({ params }: { params: Promise<{ id: st
                                     ))}
                                 </div>
 
-                                <div className="glass-card p-10 bg-gradient-to-br from-primary/10 to-transparent border-none">
-                                    <h3 className="text-xl font-black mb-4 flex items-center gap-2">
-                                        <Award className="w-6 h-6 text-primary" />
-                                        Certified Organic
-                                    </h3>
-                                    <p className="text-muted-foreground text-sm mb-8 leading-relaxed">This farm is verified by the Gujarat Organic Products Certification Agency (GOPCA) and adheres to global standards for sustainable agriculture.</p>
-                                    <button className="w-full py-5 bg-white text-primary border-2 border-primary/20 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary/5 transition-colors shadow-xl">View Certification</button>
+                                <div className="mt-12">
+                                    <CertificationBoard />
                                 </div>
                             </div>
 
