@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  FARMER
+  BUYER
+}
+
+enum BusinessType {
+  VEGETABLE_SHOP
+  RESTAURANT
+  DISTRIBUTOR
+  RETAIL_CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  role         Role
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String?
+  otp          String?
+  otpExpiry    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  farmerProfile FarmerProfile?
+  buyerProfile  BuyerProfile?
+  
+  farmerOrders  Order[] @relation("FarmerOrders")
+  buyerOrders   Order[] @relation("BuyerOrders")
+
+  farmerReviews Review[] @relation("FarmerReviews")
+  buyerReviews  Review[] @relation("BuyerReviews")
+  
+  // Following system
+  following     Follower[] @relation("UserFollowing")
+}
+
+model FarmerProfile {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  
+  slug               String   @unique // For SEO: /farmers/ramesh-patel
+  bio                String?  @db.Text
+  village            String
+  state              String
+  farmSize           String
+  experienceYears    Int      @default(0)
+  farmingType        String   @default("Organic") // Organic, Natural, Traditional
+  
+  // Farming Methods (Structured)
+  fertilizers        String?
+  pestControl        String?
+  waterSystem        String?
+
+  profileImage       String?
+  coverImage         String?
+  farmPhoto          String?
+  isOrganicCertified Boolean  @default(false)
+  farmImages         String[] 
+  
+  cropsGrown         String[]
+  transportAvailable Boolean  @default(false)
+  
+  // Trust Indicators
+  avgRating          Float    @default(0)
+  totalOrders        Int      @default(0)
+  totalSales         Float    @default(0)
+  
+  isApproved         Boolean  @default(false)
+  qrCodeUrl          String?
+  
+  // Links
+  whatsappNumber     String?
+  
+  products           Product[]
+  harvestCalendar    HarvestCalendar[]
+  bulkOrders         BulkOrderRequest[]
+  followers          Follower[] @relation("FarmerFollowers")
+}
+
+model BuyerProfile {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id])
+  businessType   BusinessType
+  businessName   String?
+  weeklyQuantity String?      // Estimated weekly purchase quantity
+  city           String?
+}
+
+model HarvestCalendar {
+  id             String        @id @default(uuid())
+  farmerId       String
+  farmer         FarmerProfile @relation(fields: [farmerId], references: [id])
+  month          String        // e.g., "April"
+  cropName       String
+  expectedOutput String?
+  createdAt      DateTime      @default(now())
+}
+
+model Follower {
+  id        String        @id @default(uuid())
+  userId    String        // The buyer following
+  user      User          @relation("UserFollowing", fields: [userId], references: [id])
+  farmerId  String        // The farmer being followed
+  farmer    FarmerProfile @relation("FarmerFollowers", fields: [farmerId], references: [id])
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, farmerId])
+}
+
+model Product {
+  id                 String   @id @default(uuid())
+  farmerId           String
+  farmer             FarmerProfile @relation(fields: [farmerId], references: [id])
+  name               String
+  description        String?
+  category           String?  // e.g., "Vegetable", "Fruit"
+  organicType        String
+  quantityAvailable  Float
+  unit               String   @default("kg") // kg, bundle, gram
+  pricePerKg         Float
+  harvestDate        DateTime
+  isAvailable        Boolean  @default(true)
+  images             String[] 
+  
+  orders             Order[]
+  bulkOrderRequests  BulkOrderRequest[]
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model BulkOrderRequest {
+  id               String        @id @default(uuid())
+  farmerId         String
+  farmer           FarmerProfile @relation(fields: [farmerId], references: [id])
+  productId        String
+  product          Product       @relation(fields: [productId], references: [id])
+  buyerName        String
+  buyerContact     String
+  requiredQuantity Float
+  preferredDate    DateTime
+  notes            String?
+  status           OrderStatus   @default(PENDING)
+  createdAt        DateTime      @default(now())
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  buyerId      String
+  buyer        User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  farmerId     String
+  farmer       User        @relation("FarmerOrders", fields: [farmerId], references: [id])
+  productId    String
+  product      Product     @relation(fields: [productId], references: [id])
+  quantity     Float
+  totalPrice   Float
+  status       OrderStatus @default(PENDING)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  buyerId   String
+  buyer     User     @relation("BuyerReviews", fields: [buyerId], references: [id])
+  farmerId  String
+  farmer    User     @relation("FarmerReviews", fields: [farmerId], references: [id])
+  rating    Int
+  comment   String?
+  
+  createdAt DateTime @default(now())
+}
+
+model BlogPost {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MarketPrice {
+  id           String   @id @default(uuid())
+  cropName     String
+  region       String
+  averagePrice Float
+  date         DateTime @default(now())
+
+  @@index([cropName, date])
+}
